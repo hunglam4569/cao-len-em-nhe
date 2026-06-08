@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="theme-color" content="#f9eef4"/>
+<title>🌸 Cao lên em nhé!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ============ RESET ============ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --pink:#c0547a;--pink-light:#f9eef4;--pink-mid:#e8729a;--pink-border:#f0d0e0;
+  --pink-bg:#fff0f5;--text:#3d2a35;--muted:#a07090;--card:#fff;--bg:#fdf6f9;
+  --mint:#52c78a;--mint-light:#e0f7ec;--mint-dark:#1a7a52;
+  --peach:#ffb347;--peach-light:#fff3e0;
+  --sky:#64b5f6;--sky-light:#e3f2fd;
+  --lavender:#b39ddb;--lavender-light:#ede7f6;
+  --border:#f0d0e0;--radius:18px;
+}
+html,body{font-family:'Quicksand',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ============ APP SHELL ============ */
+.app-shell{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);}
+.status-bar{background:var(--pink-light);padding:10px 20px 6px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--pink);font-weight:700;flex-shrink:0;}
+.app-header{background:var(--pink-light);padding:14px 20px;text-align:center;border-bottom:1px solid var(--pink-border);flex-shrink:0;}
+.app-header h1{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--pink);}
+.app-header p{font-size:12px;color:var(--muted);margin-top:2px;}
+.screen{display:none;flex:1;overflow-y:auto;padding-bottom:80px;}
+.screen.on{display:block;}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--pink-light);border-top:1px solid var(--pink-border);display:flex;z-index:200;}
+.nav-btn{flex:1;padding:9px 2px 11px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'Nunito',sans-serif;}
+.nav-btn .ni{font-size:20px;}
+.nav-btn .nl{font-size:9px;font-weight:700;color:var(--muted);}
+.nav-btn.on .nl{color:var(--pink);}
+
+/* ============ SCREEN: HOME (nhắc nhở) ============ */
+.home-content{padding:14px 14px 0;}
+.greeting-card{background:var(--pink-bg);border-radius:20px;border:1px solid var(--pink-border);padding:18px;margin-bottom:14px;text-align:center;}
+.greeting-card .g-emoji{font-size:36px;margin-bottom:8px;}
+.greeting-card .g-msg{font-size:16px;font-weight:800;color:var(--pink);line-height:1.4;font-family:'Nunito',sans-serif;}
+.greeting-card .g-sub{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;}
+.sec-lbl{font-size:11px;font-weight:800;color:var(--pink);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;margin-top:16px;}
+.name-row{display:flex;gap:8px;margin-bottom:14px;}
+.name-row input{flex:1;border:1px solid var(--pink-border);border-radius:12px;padding:10px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:var(--text);background:var(--card);outline:none;}
+.name-row input:focus{border-color:var(--pink-mid);}
+.btn-pink{padding:10px 18px;border-radius:12px;background:var(--pink-mid);border:none;color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.check-item{background:var(--card);border-radius:13px;border:1px solid var(--pink-border);padding:12px 14px;margin-bottom:7px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.circle{width:24px;height:24px;border-radius:50%;border:2px solid var(--pink-border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;transition:all .2s;}
+.circle.done{background:var(--pink-mid);border-color:var(--pink-mid);}
+.check-text{font-size:13px;color:var(--text);line-height:1.4;flex:1;}
+.check-text.done{text-decoration:line-through;color:var(--muted);}
+.progress-bar-wrap{background:#f5dce8;border-radius:20px;height:10px;margin:8px 0 4px;overflow:hidden;}
+.progress-bar{height:100%;background:var(--pink-mid);border-radius:20px;transition:width .4s;}
+.progress-lbl{font-size:12px;color:var(--muted);text-align:center;font-weight:700;}
+
+/* ============ SCREEN: NHẮC NHỞ ============ */
+.remind-content{padding:14px;}
+.reminder-item{background:var(--card);border-radius:14px;border:1px solid var(--pink-border);padding:13px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.r-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.r-body{flex:1;}
+.r-time{font-size:12px;font-weight:800;color:var(--pink);}
+.r-msg{font-size:12px;color:var(--text);line-height:1.5;margin-top:3px;}
+.toggle{width:42px;height:24px;border-radius:24px;background:#f0c8dc;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--pink-mid);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;}
+.toggle.on::after{left:21px;}
+
+/* ============ SCREEN: ĐO CHIỀU CAO ============ */
+.height-content{padding:14px;}
+.hform{background:var(--card);border-radius:16px;border:1px solid var(--pink-border);padding:14px;margin-bottom:10px;}
+.hform label{font-size:12px;font-weight:800;color:var(--pink);display:block;margin-bottom:6px;}
+.hform input[type=number]{width:100%;border:1px solid var(--pink-border);border-radius:10px;padding:10px 14px;font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:var(--text);text-align:center;background:#fff;outline:none;-moz-appearance:textfield;}
+.hform input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+.hform input[type=number]:focus{border-color:var(--pink-mid);}
+.height-entry{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--pink-border);}
+.height-entry:last-child{border-bottom:none;}
+.he-date{font-size:12px;color:var(--muted);font-weight:700;}
+.he-val{font-size:16px;font-weight:800;color:var(--pink);}
+.he-diff{font-size:12px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.he-diff.up{background:#e0f7ec;color:#1a7a52;}
+.he-diff.same{background:#f5f5f5;color:#888;}
+.week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:8px;}
+.day-col{text-align:center;}
+.day-name{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;}
+.day-bar-wrap{height:48px;display:flex;align-items:flex-end;justify-content:center;}
+.day-bar{width:10px;border-radius:5px;background:var(--pink-border);}
+.day-bar.on{background:var(--pink-mid);}
+.day-num{font-size:9px;color:var(--muted);font-weight:700;margin-top:3px;}
+
+/* ============ SCREEN: NHẬT KÝ ============ */
+.diary-content{padding:14px;}
+.dform{background:var(--card);border-radius:16px;border:1px solid var(--pink-border);padding:14px;margin-bottom:10px;}
+.dform textarea{width:100%;border:1px solid var(--pink-border);border-radius:10px;padding:10px 14px;font-family:'Quicksand',sans-serif;font-size:14px;color:var(--text);background:#fff;outline:none;resize:none;min-height:90px;line-height:1.5;}
+.dform textarea:focus{border-color:var(--pink-mid);}
+.mood-row{display:flex;gap:8px;justify-content:space-between;margin:10px 0;}
+.mood-btn{flex:1;font-size:22px;background:var(--pink-bg);border:1px solid var(--pink-border);border-radius:12px;padding:8px 4px;cursor:pointer;}
+.mood-btn.sel{background:var(--pink-mid);border-color:var(--pink-mid);}
+.diary-entry{background:var(--card);border-radius:14px;border:1px solid var(--pink-border);padding:12px 14px;margin-bottom:8px;}
+.de-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.de-date{font-size:11px;color:var(--muted);font-weight:700;}
+.de-mood{font-size:20px;}
+.de-text{font-size:13px;color:var(--text);line-height:1.55;}
+
+/* ============ SCREEN: THÀNH TÍCH ============ */
+.medal-content{padding:14px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.stat-card{background:var(--card);border-radius:14px;border:1px solid var(--pink-border);padding:14px;text-align:center;}
+.stat-num{font-size:28px;font-weight:800;color:var(--pink);font-family:'Nunito',sans-serif;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:3px;font-weight:700;}
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.badge{text-align:center;border-radius:14px;padding:12px 4px;border:1px solid var(--pink-border);}
+.badge.earned{background:var(--pink-bg);}
+.badge.locked{background:#f9f9f9;opacity:0.45;}
+.badge-emoji{font-size:26px;}
+.badge-name{font-size:10px;color:var(--muted);margin-top:4px;font-weight:700;}
+.msg-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 8px;}
+.msg-btn{padding:12px 6px;border-radius:14px;border:1px solid var(--pink-border);background:var(--pink-bg);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--pink);cursor:pointer;}
+.msg-btn:active{background:var(--pink-mid);color:#fff;}
+.preview-bubble{background:var(--card);border-radius:16px;border:1px solid var(--pink-border);padding:14px;margin-top:10px;}
+.pb-app{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;}
+.pb-title{font-size:14px;font-weight:800;color:var(--pink);margin-bottom:4px;font-family:'Nunito',sans-serif;}
+.pb-body{font-size:13px;color:var(--text);line-height:1.55;}
+.btn-outline{padding:10px 16px;border-radius:12px;background:var(--pink-bg);border:1px solid var(--pink-border);color:var(--pink);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:8px;}
+
+/* ============ SCREEN: PHÂN TÍCH CƠ THỂ ============ */
+.body-content{padding:14px;}
+/* Reuse rose aliases = pink vars */
+.section{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:14px;}
+.section-title{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--pink);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.section-title .icon{width:30px;height:30px;border-radius:50%;background:var(--pink-bg);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.gender-row{display:flex;gap:10px;margin-bottom:18px;}
+.gender-btn{flex:1;padding:12px;border-radius:14px;border:2px solid var(--border);background:var(--bg);font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.gender-btn.sel{border-color:var(--pink-mid);background:var(--pink-bg);color:var(--pink);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:12px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:0.5px;}
+.field input{border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-family:'Quicksand',sans-serif;font-size:15px;font-weight:600;color:var(--text);background:#fff;outline:none;transition:border-color .2s;}
+.field input:focus{border-color:var(--pink-mid);}
+.field .unit{font-size:11px;color:var(--muted);margin-top:2px;}
+.measure-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:4px;}
+@media(max-width:400px){.measure-grid{grid-template-columns:1fr;}}
+.analyze-btn{width:100%;padding:16px;border-radius:14px;background:var(--pink-mid);border:none;color:#fff;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;margin-top:20px;transition:opacity .2s;}
+.analyze-btn:active{opacity:0.85;}
+.ba-results{display:none;}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px;}
+.metric-card{border-radius:14px;padding:14px;text-align:center;border:1px solid var(--border);}
+.mc-val{font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;}
+.mc-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-top:4px;}
+.mc-sub{font-size:11px;font-weight:600;margin-top:5px;border-radius:20px;padding:2px 8px;display:inline-block;}
+.mc-green{background:var(--mint-light);color:var(--mint-dark);border-color:#b8e8cd;}
+.mc-green .mc-val{color:var(--mint-dark);}
+.mc-green .mc-sub{background:var(--mint-dark);color:#fff;}
+.mc-rose{background:var(--pink-bg);color:var(--pink);border-color:var(--pink-border);}
+.mc-rose .mc-val{color:var(--pink);}
+.mc-rose .mc-sub{background:var(--pink);color:#fff;}
+.mc-peach{background:var(--peach-light);color:#e65100;border-color:#ffe082;}
+.mc-peach .mc-val{color:#e65100;}
+.mc-peach .mc-sub{background:#e65100;color:#fff;}
+.mc-sky{background:var(--sky-light);color:#0d47a1;border-color:#b3d9f5;}
+.mc-sky .mc-val{color:#0d47a1;}
+.mc-sky .mc-sub{background:#0d47a1;color:#fff;}
+.mc-lav{background:var(--lavender-light);color:#4a148c;border-color:#d1c4e9;}
+.mc-lav .mc-val{color:#4a148c;}
+.mc-lav .mc-sub{background:#6a1b9a;color:#fff;}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+@media(max-width:400px){.charts-row{grid-template-columns:1fr;}}
+.chart-wrap{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:14px;text-align:center;}
+.chart-wrap h4{font-size:12px;font-weight:700;color:var(--pink);margin-bottom:10px;}
+.chart-wrap canvas{max-height:160px;}
+.advice-section{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:12px;}
+.advice-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.advice-emoji{font-size:26px;}
+.advice-title{font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--pink);}
+.advice-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.advice-block{margin-bottom:14px;}
+.advice-block h4{font-size:12px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.advice-block ul{list-style:none;padding:0;}
+.advice-block ul li{font-size:12px;color:var(--text);padding:4px 0 4px 16px;position:relative;line-height:1.55;border-bottom:1px solid #faeaf2;}
+.advice-block ul li:last-child{border-bottom:none;}
+.advice-block ul li::before{content:'🌸';position:absolute;left:0;font-size:10px;top:5px;}
+.meal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:8px;}
+.meal-card{background:var(--pink-bg);border-radius:12px;border:1px solid var(--pink-border);padding:10px;}
+.meal-day{font-size:10px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.meal-card ul li::before{content:'·';color:var(--pink-mid);}
+.vong-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.vong-tab{flex:1;min-width:100px;padding:10px 6px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;text-align:center;transition:all .2s;}
+.vong-tab.on{border-color:var(--pink-mid);background:var(--pink-bg);color:var(--pink);}
+.pbar-wrap{background:#f5dce8;border-radius:20px;height:8px;margin:4px 0 2px;overflow:hidden;}
+.pbar{height:100%;border-radius:20px;background:var(--pink-mid);transition:width .5s;}
+.action-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.act-btn{flex:1;min-width:110px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--pink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
+.act-btn.primary{background:var(--pink);color:#fff;border-color:var(--pink);}
+.ba-hist-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.ba-hist-row:last-child{border-bottom:none;}
+.ba-h-date{color:var(--muted);font-weight:700;font-size:11px;}
+.ba-h-val{font-weight:700;color:var(--pink);}
+.disclaimer{background:#fffde7;border-radius:12px;border:1px solid #ffe082;padding:10px 12px;font-size:11px;color:#5d4037;line-height:1.6;margin-top:12px;}
+@media print{
+  .bottom-nav,.status-bar,.app-header{display:none!important;}
+  .screen{display:block!important;overflow:visible;}
+  #scr-body{display:none!important;}
+  #scr-remind{display:none!important;}
+  #scr-height{display:none!important;}
+  #scr-diary{display:none!important;}
+  #scr-medal{display:none!important;}
+  #scr-body-analysis{display:block!important;}
+  .ba-results{display:block!important;}
+}
+
+/* ============ TOAST ============ */
+.toast{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);background:var(--pink);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span id="clock">9:41</span>
+    <span>🌸 Cao lên em nhé!</span>
+    <span>💕</span>
+  </div>
+
+  <!-- APP HEADER -->
+  <div class="app-header">
+    <h1 id="app-title">🌸 Cao lên em nhé!</h1>
+    <p id="app-subtitle">Hành trình xinh xắn của em gái yêu</p>
+  </div>
+
+  <!-- ==================== SCREEN: HÔM NAY ==================== -->
+  <div class="screen on" id="scr-body">
+    <div class="home-content">
+      <div class="greeting-card">
+        <div class="g-emoji" id="g-emoji">🌸</div>
+        <div class="g-msg" id="g-msg">Chào em yêu của anh!</div>
+        <div class="g-sub" id="g-sub">Hôm nay là ngày em sẽ cao thêm một chút nữa nha 🥰</div>
+      </div>
+      <div class="name-row">
+        <input id="nameInput" placeholder="Tên em yêu..." maxlength="20"/>
+        <button class="btn-pink" onclick="saveName()">Lưu 💕</button>
+      </div>
+      <div class="sec-lbl">Checklist hôm nay</div>
+      <div id="checklist"></div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
+      <div class="progress-lbl" id="prog-lbl">Hoàn thành: 0/9 🌱</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN: NHẮC NHỞ ==================== -->
+  <div class="screen" id="scr-remind">
+    <div class="remind-content">
+      <div class="sec-lbl">Nhắc nhở theo giờ</div>
+      <div id="reminders-list"></div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN: ĐO CHIỀU CAO ==================== -->
+  <div class="screen" id="scr-height">
+    <div class="height-content">
+      <div class="hform">
+        <label>📏 Đo chiều cao hôm nay (cm)</label>
+        <input type="number" id="heightInput" placeholder="144" min="100" max="200" step="0.1"/>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <select id="moodSelect" style="flex:1;border:1px solid var(--pink-border);border-radius:10px;padding:9px 12px;font-family:'Quicksand',sans-serif;font-size:14px;color:var(--text);background:#fff;outline:none;">
+            <option value="😊">😊 Vui vẻ</option><option value="💪">💪 Năng lượng</option>
+            <option value="😴">😴 Mệt chút</option><option value="🤗">🤗 Hạnh phúc</option>
+            <option value="🌟">🌟 Tuyệt vời</option>
+          </select>
+          <button class="btn-pink" onclick="addHeightEntry()">Ghi ✅</button>
+        </div>
+        <div id="height-feedback" style="font-size:12px;color:var(--pink);font-weight:700;text-align:center;margin-top:6px;min-height:18px;"></div>
+      </div>
+      <div class="sec-lbl">Biểu đồ tuần</div>
+      <div style="background:var(--card);border-radius:14px;border:1px solid var(--pink-border);padding:14px;margin-bottom:10px;">
+        <div class="week-row" id="week-chart"></div>
+        <div style="text-align:center;font-size:11px;color:var(--muted);">Số việc hoàn thành mỗi ngày</div>
+      </div>
+      <div class="sec-lbl">Lịch sử chiều cao</div>
+      <div style="background:var(--card);border-radius:14px;border:1px solid var(--pink-border);padding:14px;margin-bottom:10px;" id="height-log">
+        <div style="text-align:center;color:var(--muted);font-size:13px;padding:10px;">Chưa có dữ liệu 🌸</div>
+      </div>
+      <div style="background:var(--card);border-radius:14px;border:1px solid var(--pink-border);padding:14px;margin-bottom:10px;">
+        <canvas id="historyChart" style="max-height:160px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN: NHẬT KÝ ==================== -->
+  <div class="screen" id="scr-diary">
+    <div class="diary-content">
+      <div class="dform">
+        <label style="font-size:12px;font-weight:700;color:var(--pink);display:block;margin-bottom:6px;">💌 Ghi cảm xúc hôm nay</label>
+        <div class="mood-row">
+          <button class="mood-btn" onclick="selMood(this,'😊')">😊</button>
+          <button class="mood-btn" onclick="selMood(this,'💪')">💪</button>
+          <button class="mood-btn" onclick="selMood(this,'😴')">😴</button>
+          <button class="mood-btn" onclick="selMood(this,'🥺')">🥺</button>
+          <button class="mood-btn" onclick="selMood(this,'🤗')">🤗</button>
+        </div>
+        <textarea id="diaryText" placeholder="Hôm nay em cảm thấy thế nào? 🥰"></textarea>
+        <button class="btn-pink" style="width:100%;margin-top:10px;" onclick="saveDiary()">Lưu nhật ký 🌸</button>
+      </div>
+      <div class="sec-lbl">Nhật ký gần đây</div>
+      <div id="diary-entries"></div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN: THÀNH TÍCH ==================== -->
+  <div class="screen" id="scr-medal">
+    <div class="medal-content">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num" id="s-streak">0</div><div class="stat-lbl">Ngày liên tiếp 🔥</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-done">0</div><div class="stat-lbl">Việc hôm nay ✅</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-lbl">Tổng việc đã làm 🌟</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-days">1</div><div class="stat-lbl">Ngày tham gia 📅</div></div>
+      </div>
+      <div class="sec-lbl">Huy hiệu</div>
+      <div class="badge-grid" id="badge-grid"></div>
+      <div class="sec-lbl">Tin nhắn từ anh 💌</div>
+      <div class="msg-btns">
+        <button class="msg-btn" onclick="showMsg('morning')">🌅 Tin sáng</button>
+        <button class="msg-btn" onclick="showMsg('cheer')">💪 Cổ vũ</button>
+        <button class="msg-btn" onclick="showMsg('night')">🌙 Chúc ngủ</button>
+        <button class="msg-btn" onclick="showMsg('love')">💕 Yêu thương</button>
+      </div>
+      <div id="msg-box" class="preview-bubble" style="display:none;">
+        <div class="pb-app">💌 Từ anh gửi em</div>
+        <div class="pb-title" id="msg-title"></div>
+        <div class="pb-body" id="msg-body"></div>
+        <button class="btn-outline" onclick="copyMsg()">Sao chép để gửi cho em 📋</button>
+      </div>
+      <div class="sec-lbl" style="margin-top:16px;">Lời nhắn đặc biệt</div>
+      <div style="background:var(--pink-bg);border-radius:16px;border:1px solid var(--pink-border);padding:16px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:8px;">💌</div>
+        <div id="special-msg" style="font-size:13px;font-weight:600;color:var(--text);line-height:1.6;font-family:'Nunito',sans-serif;">"Em à, dù kết quả thế nào thì trong mắt anh em vẫn luôn là cô gái xinh đẹp và tuyệt vời nhất 💕"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN: PHÂN TÍCH CƠ THỂ ==================== -->
+  <div class="screen" id="scr-body-analysis">
+    <div class="body-content">
+      <div class="section">
+        <div class="section-title"><div class="icon">📋</div>Nhập số đo của em</div>
+        <div class="gender-row">
+          <button class="gender-btn sel" id="btn-female" onclick="baSelGender('female')">👩 Nữ</button>
+          <button class="gender-btn" id="btn-male" onclick="baSelGender('male')">👨 Nam</button>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Chiều cao</label><input type="number" id="ba-height" placeholder="144" min="100" max="220"/><div class="unit">cm</div></div>
+          <div class="field"><label>Cân nặng</label><input type="number" id="ba-weight" placeholder="48" min="20" max="200"/><div class="unit">kg</div></div>
+          <div class="field"><label>Tuổi</label><input type="number" id="ba-age" placeholder="22" min="10" max="80"/><div class="unit">tuổi</div></div>
+        </div>
+        <div class="section-title" style="margin-top:18px;margin-bottom:10px;"><div class="icon">📏</div>Số đo 3 vòng</div>
+        <div class="measure-grid">
+          <div class="field"><label>Vòng 1</label><input type="number" id="ba-v1" placeholder="85" min="50" max="150"/><div class="unit">cm</div></div>
+          <div class="field"><label>Vòng 2</label><input type="number" id="ba-v2" placeholder="63" min="40" max="150"/><div class="unit">cm</div></div>
+          <div class="field"><label>Vòng 3</label><input type="number" id="ba-v3" placeholder="90" min="50" max="170"/><div class="unit">cm</div></div>
+        </div>
+        <button class="analyze-btn" onclick="baAnalyze()">✨ Phân tích cơ thể của em</button>
+      </div>
+
+      <div class="ba-results" id="ba-results">
+        <div class="section">
+          <div class="section-title"><div class="icon">📊</div>Kết quả phân tích</div>
+          <div class="result-grid" id="ba-metrics"></div>
+          <div class="charts-row">
+            <div class="chart-wrap"><h4>📊 BMI</h4><canvas id="bmiChart"></canvas></div>
+            <div class="chart-wrap"><h4>⚖️ Tỉ lệ cơ thể</h4><canvas id="radarChart"></canvas></div>
+          </div>
+          <div id="ba-ratios"></div>
+        </div>
+        <div id="ba-advice"></div>
+        <div class="section">
+          <div class="section-title"><div class="icon">🎯</div>Em muốn cải thiện số đo nào?</div>
+          <div class="vong-tabs">
+            <button class="vong-tab on" onclick="baSelVong('v1',this)">🌸 Vòng 1</button>
+            <button class="vong-tab" onclick="baSelVong('v2',this)">✂️ Vòng 2</button>
+            <button class="vong-tab" onclick="baSelVong('v3',this)">🍑 Vòng 3</button>
+          </div>
+          <div id="ba-vong-area"></div>
+        </div>
+        <div class="section">
+          <div class="section-title"><div class="icon">📈</div>Lịch sử đo lường</div>
+          <div id="ba-hist-list"></div>
+          <canvas id="ba-hist-chart" style="max-height:160px;margin-top:12px;"></canvas>
+        </div>
+        <div class="action-row">
+          <button class="act-btn primary" onclick="window.print()">🖨️ In / PDF</button>
+          <button class="act-btn" onclick="baSaveHistory()">💾 Lưu hôm nay</button>
+          <button class="act-btn" onclick="baReset()">🔄 Đo lại</button>
+        </div>
+        <div class="disclaimer"><strong>⚕️ Lưu ý:</strong> Kết quả mang tính tham khảo (WHO, Deurenberg, Harvard Health). Sai số ±3–5%. Tham khảo bác sĩ trước khi áp dụng.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== BOTTOM NAV ==================== -->
+  <div class="bottom-nav">
+    <button class="nav-btn on" onclick="goScreen('body',this)"><span class="ni">🏠</span><span class="nl">Hôm nay</span></button>
+    <button class="nav-btn" onclick="goScreen('remind',this)"><span class="ni">⏰</span><span class="nl">Nhắc nhở</span></button>
+    <button class="nav-btn" onclick="goScreen('height',this)"><span class="ni">📏</span><span class="nl">Chiều cao</span></button>
+    <button class="nav-btn" onclick="goScreen('diary',this)"><span class="ni">💌</span><span class="nl">Nhật ký</span></button>
+    <button class="nav-btn" onclick="goScreen('medal',this)"><span class="ni">⭐</span><span class="nl">Thành tích</span></button>
+    <button class="nav-btn" onclick="goScreen('body-analysis',this)"><span class="ni">🔬</span><span class="nl">Phân tích</span></button>
+  </div>
+
+</div><!-- /app-shell -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================================================
+   PHẦN 1: DỮ LIỆU CHUNG
+=================================================== */
+var TASKS=[
+  {e:'☀️',t:'Phơi nắng sáng 15 phút'},
+  {e:'🥛',t:'Uống 200ml sữa buổi sáng'},
+  {e:'🤸',t:'Kéo giãn buổi sáng 10 phút'},
+  {e:'🏋️',t:'Treo xà đơn 15–30 phút'},
+  {e:'💊',t:'Uống canxi + D3 sau ăn'},
+  {e:'🥗',t:'Ăn đủ protein & rau xanh'},
+  {e:'🏊',t:'Bơi lội / Nhảy dây'},
+  {e:'📵',t:'Tắt điện thoại trước 21:30'},
+  {e:'😴',t:'Ngủ trước 22:30 tối nay'}
+];
+var REMINDERS=[
+  {t:'6:30 sáng',e:'🌅',bg:'#e0f7ec',msg:'"Ngủ ngon chưa em yêu? Dậy vươn vai cao cao nào! Buổi sáng kéo giãn là hiệu quả nhất đó 🌸"'},
+  {t:'7:00 sáng',e:'☀️',bg:'#e3f2fd',msg:'"Em ơi, ra tắm nắng 15 phút nhé! Đừng quên ly sữa buổi sáng 🥛✨"'},
+  {t:'8:00 sáng',e:'🏋️',bg:'#fce4ec',msg:'"Đến giờ treo xà rồi em yêu! Nhớ thả lỏng hoàn toàn nha 🌷"'},
+  {t:'12:30 trưa',e:'💊',bg:'#fff3e0',msg:'"Trưa rồi nè em! Nhớ uống viên canxi sau ăn nhé 💕"'},
+  {t:'5:30 chiều',e:'🏊',bg:'#e0f7ec',msg:'"Chiều chiều rồi em ơi! Đi bơi hay nhảy dây một chút nhé 🐬"'},
+  {t:'9:00 tối',e:'🌙',bg:'#e3f2fd',msg:'"Sắp đến giờ ngủ! Kéo giãn 5 phút rồi nghỉ sớm nha 🌙💫"'},
+  {t:'9:30 tối',e:'📵',bg:'#fce4ec',msg:'"Em ơi để điện thoại xuống nào! Ngủ sớm là bí quyết cao xinh nhất 🌸"'},
+  {t:'10:00 tối',e:'😴',bg:'#fff3e0',msg:'"Ngủ ngon em gái nhỏ! Chúc em có giấc ngủ thật sâu 💤🌸"'}
+];
+var MSGS={
+  morning:['Chào buổi sáng em yêu! Hôm nay là ngày tuyệt vời để cao thêm nhé 🌸','Dậy rồi à em? Mau vươn vai và uống sữa nào 🥛💕'],
+  cheer:['Em làm tốt lắm! Mỗi ngày kiên trì là đang đầu tư cho tương lai 💪🌷','Anh tự hào về em lắm lắm luôn á 🌟'],
+  night:['Ngủ ngon nha em! Hormone tăng trưởng sẽ làm việc lúc em ngủ 🌙✨','Chúc em ngủ ngon và có giấc mơ đẹp 💤💕'],
+  love:['Dù cao hay thấp em vẫn luôn là người đặc biệt nhất trong lòng anh 💕','Anh yêu sự nỗ lực của em! Em thật tuyệt vời 🌷']
+};
+var BADGES=[
+  {e:'🌱',n:'Khởi đầu',req:0},
+  {e:'🌸',n:'7 ngày',req:7},
+  {e:'⭐',n:'30 ngày',req:30},
+  {e:'🏆',n:'50 việc',req:50,type:'total'},
+  {e:'💎',n:'3 tháng',req:90},
+  {e:'📏',n:'Đo 5 lần',req:5,type:'heights'},
+  {e:'📓',n:'7 nhật ký',req:7,type:'diary'},
+  {e:'👑',n:'6 tháng',req:180}
+];
+
+/* ===================================================
+   PHẦN 2: STATE & STORAGE
+=================================================== */
+var S={name:'',toggles:[true,true,true,true,true,true,true,true],
+  todayChecks:[false,false,false,false,false,false,false,false,false],
+  heightLog:[],diaryEntries:[],totalDone:0,streak:1,
+  joinDate:new Date().toISOString().slice(0,10),weekDone:[0,0,0,0,0,0,0],currentMsg:''};
+
+function load(){
+  var raw=localStorage.getItem('clen_all_v1');
+  if(raw)try{Object.assign(S,JSON.parse(raw));}catch(e){}
+  var today=new Date().toISOString().slice(0,10);
+  if(S.lastDate!==today){
+    if(S.lastDate){
+      var pd=S.todayChecks.filter(Boolean).length;
+      if(pd>=5)S.streak=(S.streak||0)+1;else if(S.streak>1)S.streak--;
+      S.weekDone=S.weekDone||[0,0,0,0,0,0,0];
+      S.weekDone[new Date(S.lastDate).getDay()]=pd;
+    }
+    S.todayChecks=[false,false,false,false,false,false,false,false,false];
+    S.lastDate=today;
+  }
+  save();
+}
+function save(){localStorage.setItem('clen_all_v1',JSON.stringify(S));}
+
+/* ===================================================
+   PHẦN 3: NAV & CLOCK
+=================================================== */
+function goScreen(id,btn){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('scr-'+id).classList.add('on');
+  if(btn)btn.classList.add('on');
+  if(id==='height'){renderHeightLog();renderWeekChart();}
+  if(id==='diary')renderDiary();
+  if(id==='medal')updateStats();
+  if(id==='body-analysis'){document.getElementById('app-title').textContent='🔬 Phân tích cơ thể';}
+  else{document.getElementById('app-title').textContent='🌸 Cao lên em nhé!';}
+}
+function updateClock(){var n=new Date(),h=n.getHours(),m=n.getMinutes();document.getElementById('clock').textContent=(h<10?'0':'')+h+':'+(m<10?'0':'')+m;}
+setInterval(updateClock,10000);updateClock();
+
+/* ===================================================
+   PHẦN 4: HOME — CHECKLIST
+=================================================== */
+function updateGreeting(){
+  var h=new Date().getHours(),n=S.name||'em yêu';
+  var em=document.getElementById('g-emoji'),gm=document.getElementById('g-msg'),gs=document.getElementById('g-sub');
+  if(h>=5&&h<12){em.textContent='🌅';gm.textContent='Chào buổi sáng '+n+'!';gs.textContent='Hôm nay là ngày '+n+' cao thêm một chút nữa nha 🥰';}
+  else if(h>=12&&h<18){em.textContent='☀️';gm.textContent='Chào buổi chiều '+n+'!';gs.textContent='Uống nước và nghỉ ngơi chút rồi tiếp tục nhé 💕';}
+  else{em.textContent='🌙';gm.textContent='Tối rồi '+n+'!';gs.textContent='Nhớ ngủ sớm để hormone tăng trưởng làm việc nhé 😴💕';}
+  if(S.name)document.getElementById('nameInput').value=S.name;
+}
+function saveName(){var v=document.getElementById('nameInput').value.trim();if(!v){toast('Em nhập tên vào nhé 🥰');return;}S.name=v;save();updateGreeting();toast('Đã lưu tên '+v+' rồi nha 💕');}
+function renderChecklist(){
+  var el=document.getElementById('checklist');el.innerHTML='';
+  TASKS.forEach(function(t,i){
+    var d=document.createElement('div');d.className='check-item';
+    d.innerHTML='<div class="circle'+(S.todayChecks[i]?' done':'')+'">'+( S.todayChecks[i]?'✓':'')+'</div><div class="check-text'+(S.todayChecks[i]?' done':'')+'">'+t.e+' '+t.t+'</div>';
+    d.onclick=function(){tickItem(i);};el.appendChild(d);
+  });
+  updateProgress();
+}
+function tickItem(i){
+  S.todayChecks[i]=!S.todayChecks[i];
+  if(S.todayChecks[i])S.totalDone=(S.totalDone||0)+1;
+  else S.totalDone=Math.max(0,(S.totalDone||0)-1);
+  save();renderChecklist();updateStats();
+  if(S.todayChecks[i]){var c=['Giỏi lắm em! 💕','Tuyệt vời! 🌸','Em ngoan lắm! 🥰','Anh tự hào! ⭐'];toast(c[Math.floor(Math.random()*c.length)]);}
+  if(S.todayChecks.every(Boolean))setTimeout(function(){toast('Em hoàn thành tất cả! Tuyệt vời 🎉💕');},400);
+}
+function updateProgress(){
+  var done=S.todayChecks.filter(Boolean).length,total=TASKS.length,pct=Math.round(done/total*100);
+  document.getElementById('prog-bar').style.width=pct+'%';
+  var emj=['🌱','🌿','🌸','🌺','🌟','✨','💫','🎉','🏆'];
+  document.getElementById('prog-lbl').textContent='Hoàn thành: '+done+'/'+total+' '+emj[Math.min(done,8)];
+}
+
+/* ===================================================
+   PHẦN 5: REMINDERS
+=================================================== */
+function renderReminders(){
+  var el=document.getElementById('reminders-list');el.innerHTML='';
+  REMINDERS.forEach(function(r,i){
+    var on=S.toggles[i]!==false;
+    var d=document.createElement('div');d.className='reminder-item';
+    d.innerHTML='<div class="r-icon" style="background:'+r.bg+'">'+r.e+'</div><div class="r-body"><div class="r-time">'+r.t+'</div><div class="r-msg">'+r.msg+'</div></div><button class="toggle'+(on?' on':'')+'" onclick="togR(this,'+i+')" aria-label="bật tắt"></button>';
+    el.appendChild(d);
+  });
+}
+function togR(btn,i){btn.classList.toggle('on');S.toggles[i]=btn.classList.contains('on');save();}
+
+/* ===================================================
+   PHẦN 6: HEIGHT LOG
+=================================================== */
+var histChartInst=null;
+function addHeightEntry(){
+  var v=parseFloat(document.getElementById('heightInput').value);
+  if(!v||v<100||v>220){toast('Nhập chiều cao hợp lệ nhé em 📏');return;}
+  var mood=document.getElementById('moodSelect').value;
+  var today=new Date().toLocaleDateString('vi-VN');
+  var prev=S.heightLog.length>0?S.heightLog[S.heightLog.length-1].h:null;
+  var diff=prev!==null?(v-prev):0;
+  S.heightLog.push({h:v,d:today,m:mood,diff:diff});save();
+  var fb=document.getElementById('height-feedback');
+  if(prev===null)fb.textContent='Ghi nhận chiều cao ban đầu: '+v+'cm 🌸';
+  else if(diff>0)fb.textContent='Tăng +'+diff.toFixed(1)+'cm! Tuyệt vời 🎉';
+  else if(diff===0)fb.textContent='Giữ nguyên, tiếp tục kiên trì nha! 💪';
+  else fb.textContent='Đừng buồn, chiều cao thay đổi theo ngày là bình thường 💕';
+  renderHeightLog();updateStats();toast('Đã ghi '+v+'cm! '+mood);
+  document.getElementById('heightInput').value='';
+}
+function renderHeightLog(){
+  var el=document.getElementById('height-log');
+  if(!S.heightLog||!S.heightLog.length){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:10px;">Chưa có dữ liệu. Đo và ghi lại nhé em! 🌸</div>';return;}
+  el.innerHTML=S.heightLog.slice().reverse().map(function(e,i){
+    var dh='';
+    if(e.diff>0)dh='<span class="he-diff up">+'+e.diff.toFixed(1)+'cm ↑</span>';
+    else if(e.diff<0)dh='<span class="he-diff same">'+e.diff.toFixed(1)+'cm</span>';
+    return '<div class="height-entry"><span class="he-date">'+e.m+' '+e.d+'</span>'+dh+'<span class="he-val">'+e.h+'cm</span></div>';
+  }).join('');
+  renderWeekChart();
+  if(histChartInst)histChartInst.destroy();
+  if(S.heightLog.length>=2){
+    var hc=document.getElementById('historyChart').getContext('2d');
+    histChartInst=new Chart(hc,{type:'line',data:{labels:S.heightLog.map(function(e){return e.d;}),datasets:[{label:'Chiều cao (cm)',data:S.heightLog.map(function(e){return e.h;}),borderColor:'#e8729a',backgroundColor:'rgba(232,114,154,0.1)',tension:0.4,pointRadius:4,pointBackgroundColor:'#e8729a'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},scales:{x:{ticks:{font:{size:9},maxRotation:30},grid:{color:'#f5dce8'}},y:{ticks:{font:{size:9}},grid:{color:'#f5dce8'}}}}});
+  }
+}
+function renderWeekChart(){
+  var days=['CN','T2','T3','T4','T5','T6','T7'],el=document.getElementById('week-chart');el.innerHTML='';
+  var week=S.weekDone||[0,0,0,0,0,0,0],max=Math.max(1,Math.max.apply(null,week));
+  days.forEach(function(d,i){
+    var h=Math.round(week[i]/max*40)||2,today=new Date().getDay()===i;
+    el.innerHTML+='<div class="day-col"><div class="day-name">'+d+'</div><div class="day-bar-wrap"><div class="day-bar'+(today?' on':'')+'" style="height:'+h+'px"></div></div><div class="day-num">'+week[i]+'</div></div>';
+  });
+}
+
+/* ===================================================
+   PHẦN 7: DIARY
+=================================================== */
+var selMoodVal='😊';
+function selMood(btn,m){selMoodVal=m;document.querySelectorAll('.mood-btn').forEach(function(b){b.classList.remove('sel');});btn.classList.add('sel');}
+function saveDiary(){
+  var txt=document.getElementById('diaryText').value.trim();
+  if(!txt){toast('Viết gì đó đi em 🥰');return;}
+  S.diaryEntries=S.diaryEntries||[];
+  S.diaryEntries.unshift({d:new Date().toLocaleDateString('vi-VN'),m:selMoodVal,t:txt});
+  if(S.diaryEntries.length>30)S.diaryEntries=S.diaryEntries.slice(0,30);
+  save();document.getElementById('diaryText').value='';
+  renderDiary();updateStats();toast('Đã lưu nhật ký! 💕');
+}
+function renderDiary(){
+  var el=document.getElementById('diary-entries');
+  if(!S.diaryEntries||!S.diaryEntries.length){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:10px;">Chưa có nhật ký 💕</div>';return;}
+  el.innerHTML=S.diaryEntries.map(function(e){return '<div class="diary-entry"><div class="de-header"><span class="de-date">'+e.d+'</span><span class="de-mood">'+e.m+'</span></div><div class="de-text">'+e.t+'</div></div>';}).join('');
+}
+
+/* ===================================================
+   PHẦN 8: MEDAL & MESSAGES
+=================================================== */
+function updateStats(){
+  var done=S.todayChecks.filter(Boolean).length;
+  document.getElementById('s-streak').textContent=S.streak||1;
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-total').textContent=S.totalDone||0;
+  var days=Math.max(1,Math.round((new Date()-new Date(S.joinDate))/(1000*60*60*24))+1);
+  document.getElementById('s-days').textContent=days;
+  var el=document.getElementById('badge-grid');el.innerHTML='';
+  var heights=S.heightLog?S.heightLog.length:0,dc=S.diaryEntries?S.diaryEntries.length:0;
+  BADGES.forEach(function(b){
+    var earned=b.type==='total'?(S.totalDone||0)>=b.req:b.type==='heights'?heights>=b.req:b.type==='diary'?dc>=b.req:days>=b.req;
+    el.innerHTML+='<div class="badge '+(earned?'earned':'locked')+'"><div class="badge-emoji">'+b.e+'</div><div class="badge-name">'+b.n+'</div></div>';
+  });
+}
+function showMsg(type){
+  var pool=MSGS[type],msg=pool[Math.floor(Math.random()*pool.length)];
+  var n=S.name;if(n)msg=msg.replace(/em/g,n).replace(/Em/g,n[0].toUpperCase()+n.slice(1));
+  S.currentMsg=msg;
+  var titles={morning:'🌅 Tin sáng',cheer:'💪 Lời cổ vũ',night:'🌙 Chúc ngủ',love:'💕 Yêu thương'};
+  document.getElementById('msg-title').textContent=titles[type];
+  document.getElementById('msg-body').textContent=msg;
+  document.getElementById('msg-box').style.display='block';
+}
+function copyMsg(){if(navigator.clipboard&&S.currentMsg){navigator.clipboard.writeText(S.currentMsg).then(function(){toast('Đã sao chép! 💌');});}}
+
+/* ===================================================
+   PHẦN 9: BODY ANALYSIS
+=================================================== */
+var BA={gender:'female',height:0,weight:0,age:0,v1:0,v2:0,v3:0,bmi:0,bodyFat:0,whr:0,v13ratio:0};
+var baChartBmi=null,baChartRadar=null,baHistChart=null;
+var baHistory=[];
+
+function baSelGender(g){
+  BA.gender=g;
+  document.getElementById('btn-female').classList.toggle('sel',g==='female');
+  document.getElementById('btn-male').classList.toggle('sel',g==='male');
+}
+function bmiCat(bmi){
+  if(bmi<16)return{lbl:'Gầy III',cls:'mc-sky',emoji:'🫧'};
+  if(bmi<17)return{lbl:'Gầy II',cls:'mc-sky',emoji:'🌬️'};
+  if(bmi<18.5)return{lbl:'Nhẹ cân',cls:'mc-sky',emoji:'🌱'};
+  if(bmi<25)return{lbl:'Bình thường',cls:'mc-green',emoji:'✨'};
+  if(bmi<30)return{lbl:'Thừa cân',cls:'mc-peach',emoji:'🍊'};
+  if(bmi<35)return{lbl:'Béo phì I',cls:'mc-rose',emoji:'🍎'};
+  return{lbl:'Béo phì II',cls:'mc-rose',emoji:'⚠️'};
+}
+function bfCat(bf,g){
+  if(g==='female'){if(bf<14)return{lbl:'Rất thấp',cls:'mc-sky'};if(bf<21)return{lbl:'VĐV',cls:'mc-green'};if(bf<25)return{lbl:'Fit',cls:'mc-green'};if(bf<32)return{lbl:'Bình thường',cls:'mc-lav'};return{lbl:'Cao',cls:'mc-rose'};}
+  else{if(bf<6)return{lbl:'Rất thấp',cls:'mc-sky'};if(bf<14)return{lbl:'VĐV',cls:'mc-green'};if(bf<18)return{lbl:'Fit',cls:'mc-green'};if(bf<25)return{lbl:'Bình thường',cls:'mc-lav'};return{lbl:'Cao',cls:'mc-rose'};}
+}
+function baAnalyze(){
+  var h=parseFloat(document.getElementById('ba-height').value);
+  var w=parseFloat(document.getElementById('ba-weight').value);
+  var age=parseFloat(document.getElementById('ba-age').value)||22;
+  var v1=parseFloat(document.getElementById('ba-v1').value)||0;
+  var v2=parseFloat(document.getElementById('ba-v2').value)||0;
+  var v3=parseFloat(document.getElementById('ba-v3').value)||0;
+  if(!h||!w||h<100||w<20){toast('Em nhập chiều cao và cân nặng nhé 🥰');return;}
+  BA.height=h;BA.weight=w;BA.age=age;BA.v1=v1;BA.v2=v2;BA.v3=v3;
+  var hm=h/100;BA.bmi=+(w/(hm*hm)).toFixed(1);
+  BA.whr=v2&&v3?+(v2/v3).toFixed(2):0;
+  BA.v13ratio=v1&&v3?+(v1/v3).toFixed(2):0;
+  BA.bodyFat=+(1.20*BA.bmi+0.23*age-10.8*(BA.gender==='male'?1:0)-5.4).toFixed(1);
+  if(BA.bodyFat<5)BA.bodyFat=5;
+  baRenderMetrics();baRenderCharts();baRenderRatios();baRenderAdvice();baSelVong('v1',document.querySelector('.vong-tab'));
+  baLoadHistory();
+  document.getElementById('ba-results').style.display='block';
+  setTimeout(function(){document.getElementById('ba-results').scrollIntoView({behavior:'smooth',block:'start'});},100);
+}
+function baRenderMetrics(){
+  var bc=bmiCat(BA.bmi),bfc=bfCat(BA.bodyFat,BA.gender);
+  var whrOk=BA.gender==='female'?BA.whr<0.85:BA.whr<0.9;
+  var whrLbl=BA.whr?(whrOk?'Tốt ✓':'Cao ↑'):'N/A',whrCls=BA.whr?(whrOk?'mc-green':'mc-rose'):'mc-lav';
+  var html='<div class="metric-card '+bc.cls+'"><div class="mc-val">'+BA.bmi+'</div><div class="mc-lbl">BMI</div><div class="mc-sub">'+bc.lbl+' '+bc.emoji+'</div></div>'
+    +'<div class="metric-card '+bfc.cls+'"><div class="mc-val">'+BA.bodyFat+'%</div><div class="mc-lbl">Mỡ cơ thể</div><div class="mc-sub">'+bfc.lbl+'</div></div>'
+    +'<div class="metric-card '+whrCls+'"><div class="mc-val">'+(BA.whr||'—')+'</div><div class="mc-lbl">Eo/Mông</div><div class="mc-sub">'+whrLbl+'</div></div>';
+  if(BA.gender==='female'&&BA.v1&&BA.v3){var r13ok=BA.v13ratio>=0.9&&BA.v13ratio<=1.05;html+='<div class="metric-card '+(r13ok?'mc-green':'mc-lav')+'"><div class="mc-val">'+BA.v13ratio+'</div><div class="mc-lbl">V1/V3</div><div class="mc-sub">'+(r13ok?'Cân đối ✓':'Cần điều chỉnh')+'</div></div>';}
+  document.getElementById('ba-metrics').innerHTML=html;
+}
+function baRenderCharts(){
+  if(baChartBmi)baChartBmi.destroy();
+  var bc=bmiCat(BA.bmi);
+  var bmiColor=BA.bmi<18.5?'#64b5f6':BA.bmi<25?'#52c78a':BA.bmi<30?'#ffb347':'#e8729a';
+  baChartBmi=new Chart(document.getElementById('bmiChart').getContext('2d'),{type:'doughnut',data:{labels:['Gầy','Bình thường','Thừa cân','Béo phì'],datasets:[{data:[18.5,6.5,5,10],backgroundColor:['#e3f2fd','#e0f7ec','#fff3e0','#fff0f5'],borderColor:['#64b5f6','#52c78a','#ffb347','#e8729a'],borderWidth:2}]},options:{cutout:'65%',responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{font:{size:9,family:'Quicksand'},padding:6,boxWidth:8}},tooltip:{enabled:true}}},plugins:[{id:'center',afterDraw:function(chart){var ctx=chart.ctx,cx=chart.chartArea.left+(chart.chartArea.right-chart.chartArea.left)/2,cy=chart.chartArea.top+(chart.chartArea.bottom-chart.chartArea.top)/2;ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=bmiColor;ctx.font='bold 18px Nunito';ctx.fillText(BA.bmi,cx,cy-5);ctx.fillStyle='#a07090';ctx.font='9px Quicksand';ctx.fillText('BMI',cx,cy+9);ctx.restore();}}]});
+  if(baChartRadar)baChartRadar.destroy();
+  var iF=BA.gender==='female',iB=21.5,iBF=iF?22:15,iWHR=iF?0.75:0.85;
+  var bmiS=Math.min(100,Math.max(0,100-Math.abs(BA.bmi-iB)*6));
+  var bfS=Math.min(100,Math.max(0,100-Math.abs(BA.bodyFat-iBF)*3));
+  var whrS=BA.whr?Math.min(100,Math.max(0,100-Math.abs(BA.whr-iWHR)*200)):70;
+  var v13S=BA.v13ratio?Math.min(100,Math.max(0,100-Math.abs(BA.v13ratio-0.97)*200)):70;
+  baChartRadar=new Chart(document.getElementById('radarChart').getContext('2d'),{type:'radar',data:{labels:['BMI','Mỡ','Eo/Mông','Vòng'],datasets:[{label:'Em',data:[bmiS,bfS,whrS,v13S],backgroundColor:'rgba(232,114,154,0.18)',borderColor:'#e8729a',borderWidth:2,pointBackgroundColor:'#e8729a',pointRadius:3},{label:'Lý tưởng',data:[100,100,100,100],backgroundColor:'rgba(82,199,138,0.08)',borderColor:'#52c78a',borderWidth:1.5,borderDash:[4,4],pointBackgroundColor:'#52c78a',pointRadius:2}]},options:{responsive:true,maintainAspectRatio:true,scales:{r:{min:0,max:100,ticks:{display:false},pointLabels:{font:{size:9,family:'Quicksand',weight:'700'},color:'#a07090'},grid:{color:'#f5dce8'},angleLines:{color:'#f5dce8'}}},plugins:{legend:{position:'bottom',labels:{font:{size:9},padding:6,boxWidth:8}}}}});
+}
+function baRenderRatios(){
+  var html='';
+  if(BA.v2){
+    var iw=(BA.gender==='female'?BA.height*0.45:BA.height*0.48).toFixed(0);
+    var pct=Math.min(Math.round(BA.v2/iw*100),150);
+    var color=pct<=100?'#52c78a':pct<=120?'#ffb347':'#e8729a';
+    html+='<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--muted);"><span>Eo '+BA.v2+'cm</span><span>Lý tưởng ~'+iw+'cm</span></div><div class="pbar-wrap"><div class="pbar" style="width:'+Math.min(pct,100)+'%;background:'+color+'"></div></div><div style="font-size:10px;color:var(--muted);">'+(pct<=100?'✓ Eo lý tưởng':pct<=120?'Hơi rộng, có thể cải thiện':'Cần giảm vòng eo')+'</div></div>';
+  }
+  document.getElementById('ba-ratios').innerHTML=html;
+}
+function baUl(items){return '<ul>'+items.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul>';}
+function baAdviceCard(emoji,title,sub,content){return '<div class="advice-section"><div class="advice-header"><div class="advice-emoji">'+emoji+'</div><div><div class="advice-title">'+title+'</div><div class="advice-sub">'+sub+'</div></div></div>'+content+'</div>';}
+function baRenderAdvice(){
+  var c=document.getElementById('ba-advice');c.innerHTML='';
+  if(BA.bmi>=18.5&&BA.bmi<25)c.innerHTML=baAdviceNormal();
+  else if(BA.bmi>=25)c.innerHTML=baAdviceOver();
+  else c.innerHTML=baAdviceUnder();
+}
+function baAdviceNormal(){
+  var meals='<div class="meal-grid"><div class="meal-card"><div class="meal-day">🌅 Sáng</div><ul><li>200ml sữa + 2 trứng luộc</li><li>Bánh mì nguyên cám</li><li>1 quả chuối</li></ul></div><div class="meal-card"><div class="meal-day">☀️ Trưa</div><ul><li>150g cá hồi / ức gà</li><li>1 chén gạo lứt</li><li>Rau xanh xào tỏi</li></ul></div><div class="meal-card"><div class="meal-day">🌙 Tối</div><ul><li>100g thịt nạc / tôm</li><li>Salad rau củ</li><li>½ khoai lang</li></ul></div></div>';
+  return baAdviceCard('🎉','Cơ thể của em đang ở trạng thái lý tưởng!','BMI '+BA.bmi+' — Chúc mừng em 🌸','<div class="advice-block"><h4>🥗 Chế độ duy trì</h4>'+baUl(['Protein: 1.2–1.6g/kg (~'+Math.round(BA.weight*1.4)+'g/ngày)','Carb nguyên hạt: yến mạch, gạo lứt, khoai lang','Chất béo lành mạnh: bơ, dầu ô liu, hạt óc chó','Uống 2–2.5 lít nước/ngày'])+'</div><div class="advice-block"><h4>🍱 Thực đơn mẫu</h4>'+meals+'</div><div class="advice-block"><h4>🏋️ Lịch tập giữ dáng (3–4 buổi/tuần)</h4>'+baUl(['T2: Cardio nhẹ 30 phút + yoga kéo giãn','T4: Kháng lực toàn thân 40 phút','T6: Pilates hoặc bơi lội 45 phút'])+'</div>');
+}
+function baAdviceOver(){
+  var meals='<div class="meal-grid"><div class="meal-card"><div class="meal-day">🌅 N1 Sáng</div><ul><li>Yến mạch + quả mọng</li><li>2 trứng luộc</li><li>Trà xanh không đường</li></ul></div><div class="meal-card"><div class="meal-day">🌅 N2 Sáng</div><ul><li>Bánh mì nguyên cám + bơ</li><li>Ức gà luộc 100g</li></ul></div><div class="meal-card"><div class="meal-day">🌅 N3 Sáng</div><ul><li>Cháo yến mạch</li><li>Trứng chiên ít dầu</li><li>Smoothie rau xanh</li></ul></div></div>';
+  return baAdviceCard('🍊','Em đang ở mức thừa cân, từng bước nhỏ là được!','BMI '+BA.bmi+' — Không sao nhé 💕','<div class="advice-block"><h4>📉 Kế hoạch giảm cân an toàn</h4>'+baUl(['Thâm hụt 300–500 kcal/ngày, không nhịn ăn','Mục tiêu: giảm 0.5–1kg/tuần','Ưu tiên protein cao: gà, cá, đậu hũ, trứng','Hạn chế: đường, đồ chiên, nước ngọt, bánh kẹo'])+'</div><div class="advice-block"><h4>🍱 Menu giảm cân 3 ngày</h4>'+meals+'</div><div class="advice-block"><h4>💪 Lịch tập 5 buổi/tuần</h4>'+baUl(['T2: HIIT 25 phút + plank 3×60s','T3: Cardio vừa — đi bộ nhanh 40 phút','T4: Core: bicycle crunch, mountain climber','T5: HIIT + nhảy dây 20 phút','T6: Kháng lực toàn thân 45 phút'])+'</div><div class="advice-block"><h4>💡 Mẹo sinh hoạt</h4>'+baUl(['Ngủ đủ 7–8 tiếng — thiếu ngủ tăng cortisol gây mỡ bụng','Uống nước trước ăn 20 phút','Ăn chậm nhai kỹ — não cần 20 phút nhận tín hiệu no'])+'</div>');
+}
+function baAdviceUnder(){
+  var meals='<div class="meal-grid"><div class="meal-card"><div class="meal-day">🌅 N1</div><ul><li>Cháo thịt bằm + trứng</li><li>Sinh tố chuối + bơ đậu phộng</li><li>200ml sữa nguyên kem</li></ul></div><div class="meal-card"><div class="meal-day">🌅 N2</div><ul><li>Phở bò đầy đủ</li><li>Sữa chua đầy đủ béo</li><li>Hạt hỗn hợp 30g</li></ul></div><div class="meal-card"><div class="meal-day">🌅 N3</div><ul><li>Cơm gạo lứt + cá kho</li><li>Canh bí đỏ đậu hũ</li><li>Sinh tố sữa chuối</li></ul></div></div>';
+  return baAdviceCard('🌱','Em đang dưới cân lý tưởng một chút','BMI '+BA.bmi+' — Mình sẽ tăng cân lành mạnh nhé 💕','<div class="advice-block"><h4>🍽️ Kế hoạch tăng cân lành mạnh</h4>'+baUl(['Thặng dư 300–500 kcal/ngày','Protein 1.6–2.2g/kg: ~'+Math.round(BA.weight*1.9)+'g/ngày','Ăn 5–6 bữa nhỏ/ngày','Bữa phụ: sữa chua + granola, bánh mì + bơ đậu phộng'])+'</div><div class="advice-block"><h4>🍱 Thực đơn tăng cân 3 ngày</h4>'+meals+'</div><div class="advice-block"><h4>💪 Lịch tập kháng lực 4 buổi/tuần</h4>'+baUl(['T2: Ngực + vai (push-up, shoulder press) 45 phút','T4: Mông + đùi (squat, hip thrust, lunge) 45 phút','T5: Lưng + tay (row, bicep curl) 40 phút','T7: Toàn thân nhẹ + kéo giãn','Hạn chế cardio dài — tối đa 20 phút/buổi'])+'</div>');
+}
+function baSelVong(id,btn){
+  document.querySelectorAll('.vong-tab').forEach(function(t){t.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  var iF=BA.gender==='female',area=document.getElementById('ba-vong-area');
+  if(id==='v1'){area.innerHTML=iF?baV1F():baV1M();}
+  else if(id==='v2'){area.innerHTML=baV2();}
+  else{area.innerHTML=baV3();}
+}
+function baV1F(){return '<div class="advice-block"><h4>🌸 Bài tập cải thiện vòng 1 (nữ)</h4>'+baUl(['Push-up: 3×10–15 lần','Chest press tạ đôi 2–5kg: 3×12','Chest fly nằm: 3×12','Wall push-up: phù hợp tập ở nhà'])+'</div><div class="advice-block"><h4>🥗 Dinh dưỡng</h4>'+baUl(['Thực phẩm giàu phytoestrogen: đậu nành, hạt lanh','Protein đủ: cá, gà, trứng, sữa chua','Tư thế đứng thẳng vai mở ra — ngay lập tức trông đẹp hơn'])+'</div>';}
+function baV1M(){return '<div class="advice-block"><h4>💪 Lịch tập ngực nam (2 buổi/tuần)</h4>'+baUl(['Bench press: 4×8–10','Incline dumbbell press: 3×10','Cable fly: 3×12','Dip: 3×8–12'])+'</div><div class="advice-block"><h4>🍖 Dinh dưỡng</h4>'+baUl(['Protein 2g/kg: thịt đỏ nạc, ức gà, trứng, whey','Carb trước tập: chuối, yến mạch, khoai lang','Nghỉ đủ 48h giữa 2 buổi tập ngực'])+'</div>';}
+function baV2(){return '<div style="background:#fff3e0;border-radius:10px;border:1px solid #ffe082;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#5d4037;line-height:1.6;">⚠️ <strong>Sự thật:</strong> Không thể giảm mỡ cục bộ tại eo. Cần giảm mỡ toàn thân — eo sẽ tự nhỏ lại.</div>'+'<div class="advice-block"><h4>🔥 Bài tập core + cardio</h4>'+baUl(['Plank: 3×60 giây','Bicycle crunch: 3×20','Mountain climber: 3×30 giây','Hít thở bụng chân không: giữ 15–20 giây','Cardio 30–40 phút/buổi'])+'</div><div class="advice-block"><h4>🥗 Thực phẩm tránh mỡ bụng</h4>'+baUl(['Hạn chế: đường trắng, bánh kẹo, nước ngọt, rượu bia','Nên ăn: rau lá xanh, protein nạc, ngũ cốc nguyên hạt','Uống trà xanh — catechin giúp đốt mỡ bụng'])+'</div>';}
+function baV3(){return '<div class="advice-block"><h4>🍑 Lịch tập mông (3 buổi/tuần: T2, T4, T7)</h4>'+baUl(['Squat: 4×12','Hip thrust với tạ: 4×12 — hiệu quả nhất cho mông','Romanian deadlift: 3×10','Lunge bước dài: 3×12 mỗi chân','Donkey kick + Fire hydrant: 3×15 mỗi bên'])+'</div><div class="advice-block"><h4>🥩 Dinh dưỡng xây mông</h4>'+baUl(['Protein 1.6–2.2g/kg: ~'+Math.round(BA.weight*1.9)+'g/ngày','Carb nạp chậm trước tập: khoai lang, yến mạch','Tăng tạ mỗi 2 tuần (progressive overload)','Uống đủ 2–2.5 lít nước'])+'</div>';}
+function baSaveHistory(){
+  var hist=JSON.parse(localStorage.getItem('ba_hist_v1')||'[]');
+  hist.push({d:new Date().toLocaleDateString('vi-VN'),h:BA.height,w:BA.weight,bmi:BA.bmi,bf:BA.bodyFat,v1:BA.v1,v2:BA.v2,v3:BA.v3});
+  if(hist.length>20)hist=hist.slice(-20);
+  localStorage.setItem('ba_hist_v1',JSON.stringify(hist));
+  baHistory=hist;toast('Đã lưu số đo hôm nay! 💕');baRenderHistory();
+}
+function baLoadHistory(){
+  baHistory=JSON.parse(localStorage.getItem('ba_hist_v1')||'[]');baRenderHistory();
+}
+function baRenderHistory(){
+  var el=document.getElementById('ba-hist-list');
+  if(!baHistory.length){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:10px;">Chưa có lịch sử. Nhấn "Lưu hôm nay" để bắt đầu! 🌸</div>';return;}
+  el.innerHTML=baHistory.slice().reverse().map(function(e){return '<div class="ba-hist-row"><span class="ba-h-date">'+e.d+'</span><span class="ba-h-val">BMI '+e.bmi+'</span>'+(e.v2?'<span style="font-size:11px;color:var(--muted);">V2:'+e.v2+'</span>':'')+'<span class="ba-h-val">'+e.h+'cm</span></div>';}).join('');
+  if(baHistChart)baHistChart.destroy();
+  if(baHistory.length>=2){
+    baHistChart=new Chart(document.getElementById('ba-hist-chart').getContext('2d'),{type:'line',data:{labels:baHistory.map(function(e){return e.d;}),datasets:[{label:'BMI',data:baHistory.map(function(e){return e.bmi;}),borderColor:'#e8729a',backgroundColor:'rgba(232,114,154,0.1)',tension:0.4,pointRadius:3,pointBackgroundColor:'#e8729a'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:8}}},scales:{x:{ticks:{font:{size:9},maxRotation:30},grid:{color:'#f5dce8'}},y:{ticks:{font:{size:9}},grid:{color:'#f5dce8'}}}}});
+  }
+}
+function baReset(){document.getElementById('ba-results').style.display='none';document.querySelector('.body-content').scrollIntoView({behavior:'smooth'});}
+
+/* ===================================================
+   PHẦN 10: TOAST & INIT
+=================================================== */
+function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},2200);}
+
+load();updateGreeting();renderChecklist();renderReminders();renderDiary();updateStats();
+</script>
+</body>
+</html>
